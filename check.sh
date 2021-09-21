@@ -2,7 +2,7 @@
 
 # Remove cookies
 
-rm -f cookies.txt result.html
+rm -f cookies.txt result.html message.txt
 
 ### Prefecture Essonne #########################################
 ### Choose Counter  for RDV  (There are 5 counters from A to E)#
@@ -12,7 +12,11 @@ rm -f cookies.txt result.html
 ### D: 23200                                                   #
 ### E: 23201                                                   #
 ################################################################
-
+## mail template
+TO="sebihiy@gmail.com"
+echo "From: sebihiy@gmail.com" >> message.txt
+echo "To: sebihiy@gmail.com" >> message.txt
+echo "Subject: Alert RDV" >> message.txt
 
 ### Check the availability of RDV  in ALL Counters 
 
@@ -27,13 +31,19 @@ case $counter in
   23201) Guichet=E
 esac
 
-curl -XPOST -c cookies.txt -H "Content-Type: application/x-www-form-urlencoded" \
+codehttp=$(curl -XPOST -c cookies.txt -o  /dev/null  -s -w "%{http_code}\n" -H "Content-Type: application/x-www-form-urlencoded" \
      -d "planning=${counter}&nextButton=Etape+suivante"  \
-      https://www.essonne.gouv.fr/booking/create/23014/1  > /dev/null 2>&1 
+     https://www.essonne.gouv.fr/booking/create/23014/1)
+#echo "codehttp: " $codehttp
+
+if [ "$codehttp" = "502" ]; then
+    echo "502 Bad Gateway."
+    exit 1
+fi
 
 
 ### Check 
-curl 'http://www.essonne.gouv.fr/booking/create/23014/2' \
+codehttp=$(curl -o  /dev/null  -s -w "%{http_code}\n" 'http://www.essonne.gouv.fr/booking/create/23014/2' \
   -H 'Connection: keep-alive' \
   -H 'Cache-Control: max-age=0' \
   -H 'Upgrade-Insecure-Requests: 1' \
@@ -41,10 +51,18 @@ curl 'http://www.essonne.gouv.fr/booking/create/23014/2' \
   -H 'Accept-Language: en,fr-FR;q=0.9,fr;q=0.8,en-US;q=0.7,ar;q=0.6' \
   -b cookies.txt \
   --compressed \
-  --insecure > /dev/null 2>&1
+  --insecure)
+
+#echo "codehttp: " $codehttp
+
+if [ "$codehttp" = "502" ]; then
+    echo "502 Bad Gateway."
+    exit 1
+fi
+
   
   
-  curl 'https://www.essonne.gouv.fr/booking/create/23014/2' \
+curl  'https://www.essonne.gouv.fr/booking/create/23014/2' \
   -H 'Connection: keep-alive' \
   -H 'Cache-Control: max-age=0' \
   -H 'Upgrade-Insecure-Requests: 1' \
@@ -53,15 +71,25 @@ curl 'http://www.essonne.gouv.fr/booking/create/23014/2' \
   -b cookies.txt \
   --compressed > result.html
 
-grep -rin "Il n'existe plus "  result.html > /dev/null 2>&1 
 
+grep -rin "502 Bad Gateway"  result.html > /dev/null 2>&1 
 
 RDV=$?
-echo "RDV:::  $RDV"
-if [ $RDV -ne 0 ]; then
-        echo "Vite Vite des RDV sont disponibles sur le guichet :  $Guichet"
+if [ $RDV -eq 0 ]; then
+	echo "502 Bad Gateway" 
+	exit 1
 else
-	echo "Guichet : $Guichet"
-        echo "Il n'existe plus de plage horaire libre pour votre demande de rendez-vous. Veuillez recommencer ultérieurement"
+	grep -rin "Il n'existe plus "  result.html > /dev/null 2>&1
+	RDV=$?
+        if [ $RDV -eq 0 ]; then
+	   echo "Guichet =>  $Guichet" 
+           echo "Il n'existe plus de plage horaire libre pour votre demande de rendez-vous. Veuillez recommencer ultérieurement"
+        else 
+           echo "Vite Vite des RDV sont disponibles sur le guichet :  $Guichet"	>> message.txt
+
+       fi
 fi
 done 
+
+
+ssmtp -vvv $TO < message.txt 
