@@ -1,0 +1,13 @@
+From: sebihiy@gmail.com
+To: sebihiy@gmail.com
+Subject: Alert RDV
+Guichet =>  A
+Il n'existe plus de plage horaire libre pour votre demande de rendez-vous. Veuillez recommencer ultérieurement
+Guichet =>  B
+Il n'existe plus de plage horaire libre pour votre demande de rendez-vous. Veuillez recommencer ultérieurement
+Guichet =>  C
+Il n'existe plus de plage horaire libre pour votre demande de rendez-vous. Veuillez recommencer ultérieurement
+Guichet =>  D
+Il n'existe plus de plage horaire libre pour votre demande de rendez-vous. Veuillez recommencer ultérieurement
+Guichet =>  E
+Il n'existe plus de plage horaire libre pour votre demande de rendez-vous. Veuillez recommencer ultérieurement
