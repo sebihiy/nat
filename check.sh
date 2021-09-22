@@ -37,7 +37,8 @@ codehttp=$(curl -XPOST -c cookies.txt -o  /dev/null  -s -w "%{http_code}\n" -H "
 #echo "codehttp: " $codehttp
 
 if [ "$codehttp" = "502" ]; then
-    echo "502 Bad Gateway."
+    echo "502 Bad Gateway." 
+    #ssmtp -vvv $TO < message.txt
     exit 1
 fi
 
@@ -56,7 +57,8 @@ codehttp=$(curl -o  /dev/null  -s -w "%{http_code}\n" 'http://www.essonne.gouv.f
 #echo "codehttp: " $codehttp
 
 if [ "$codehttp" = "502" ]; then
-    echo "502 Bad Gateway."
+    echo "502 Bad Gateway." 
+    #ssmtp -vvv $TO < message.txt
     exit 1
 fi
 
@@ -76,20 +78,20 @@ grep -rin "502 Bad Gateway"  result.html > /dev/null 2>&1
 
 RDV=$?
 if [ $RDV -eq 0 ]; then
-	echo "502 Bad Gateway" 
+	echo "502 Bad Gateway"  
 	exit 1
 else
 	grep -rin "Il n'existe plus "  result.html > /dev/null 2>&1
 	RDV=$?
         if [ $RDV -eq 0 ]; then
 	   echo "Guichet =>  $Guichet" 
-           echo "Il n'existe plus de plage horaire libre pour votre demande de rendez-vous. Veuillez recommencer ultérieurement"
+           echo "Il n'existe plus de plage horaire libre pour votre demande de rendez-vous. Veuillez recommencer ultérieurement" 
         else 
            echo "Vite Vite des RDV sont disponibles sur le guichet :  $Guichet"	>> message.txt
-
+           ssmtp -vvv $TO < message.txt
        fi
 fi
 done 
 
 
-ssmtp -vvv $TO < message.txt 
+#ssmtp -vvv $TO < message.txt
