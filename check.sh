@@ -87,7 +87,7 @@ else
 	   echo "Guichet =>  $Guichet" 
            echo "Il n'existe plus de plage horaire libre pour votre demande de rendez-vous. Veuillez recommencer ultérieurement" 
         else 
-           echo "Vite Vite des RDV sont disponibles sur le guichet :  $Guichet"	>> message.txt
+           echo "Vite Vite des RDV sont disponibles sur le guichet =>  $Guichet" >> message.txt
            ssmtp -vvv $TO < message.txt
        fi
 fi
